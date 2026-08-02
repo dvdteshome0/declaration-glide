@@ -92,7 +92,7 @@ export async function fetchDeclaration(id: string): Promise<Declaration> {
     .maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("Declaration not found");
-  return normalize([data])[0];
+  return normalize([data])[0]!;
 }
 
 export function formatDate(value?: string | null) {
