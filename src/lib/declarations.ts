@@ -12,6 +12,7 @@ export const DECLARATION_STATUSES = [
 export type DeclarationStatus = (typeof DECLARATION_STATUSES)[number];
 
 export interface Attachment {
+  [key: string]: string | number | undefined;
   path: string;
   name: string;
   size?: number;
