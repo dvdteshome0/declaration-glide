@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedAdminAddDeclarationRouteImport } from './routes/_authenticated/admin.add-declaration'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin.dashboard'
 
 const IndexRoute = IndexRouteImport.update({
@@ -22,6 +23,12 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminAddDeclarationRoute =
+  AuthenticatedAdminAddDeclarationRouteImport.update({
+    id: '/admin/add-declaration',
+    path: '/admin/add-declaration',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin/dashboard',
@@ -31,24 +38,32 @@ const AuthenticatedAdminDashboardRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_authenticated/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin/dashboard'
+  fullPaths: '/' | '/admin/add-declaration' | '/admin/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/dashboard'
-  id: '__root__' | '/' | '/_authenticated' | '/_authenticated/admin/dashboard'
+  to: '/' | '/admin/add-declaration' | '/admin/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/_authenticated/admin/add-declaration'
+    | '/_authenticated/admin/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -72,6 +87,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/add-declaration': {
+      id: '/_authenticated/admin/add-declaration'
+      path: '/admin/add-declaration'
+      fullPath: '/admin/add-declaration'
+      preLoaderRoute: typeof AuthenticatedAdminAddDeclarationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/dashboard': {
       id: '/_authenticated/admin/dashboard'
       path: '/admin/dashboard'
@@ -83,10 +105,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminAddDeclarationRoute: typeof AuthenticatedAdminAddDeclarationRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminAddDeclarationRoute: AuthenticatedAdminAddDeclarationRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
 }
 
