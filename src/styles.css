@@ -183,3 +183,13 @@
 @utility shadow-card {
   box-shadow: var(--shadow-card);
 }
+
+@utility shadow-elevated {
+  box-shadow:
+    0 2px 4px oklch(0.28 0.075 259 / 0.08),
+    0 24px 48px -18px oklch(0.28 0.075 259 / 0.4);
+}
+
+@utility bg-hero {
+  background-image: var(--gradient-hero);
+}
