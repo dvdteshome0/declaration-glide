@@ -14,16 +14,214 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_log: {
+        Row: {
+          action: string
+          changed_by: string | null
+          changed_by_email: string | null
+          created_at: string
+          declaration_id: string | null
+          declaration_number: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+        }
+        Insert: {
+          action: string
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          declaration_id?: string | null
+          declaration_number?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+        }
+        Update: {
+          action?: string
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          declaration_id?: string | null
+          declaration_number?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+        }
+        Relationships: []
+      }
+      import_declarations: {
+        Row: {
+          assigned_agent: string | null
+          attachments: Json
+          bill_of_lading_number: string | null
+          commodity: string
+          contact_email: string
+          contact_phone: string
+          created_at: string
+          created_by: string | null
+          date_cleared_customs: string | null
+          date_exited_port: string | null
+          date_submitted: string
+          declaration_number: string
+          declaration_status: Database["public"]["Enums"]["declaration_status"]
+          health_ministry_app_no: string | null
+          hs_code: string | null
+          id: string
+          importer_name: string
+          importer_tin: string
+          last_updated: string
+          national_bank_cleared_date: string | null
+          remarks: string | null
+          trade_ministry_app_no: string | null
+        }
+        Insert: {
+          assigned_agent?: string | null
+          attachments?: Json
+          bill_of_lading_number?: string | null
+          commodity: string
+          contact_email: string
+          contact_phone: string
+          created_at?: string
+          created_by?: string | null
+          date_cleared_customs?: string | null
+          date_exited_port?: string | null
+          date_submitted?: string
+          declaration_number: string
+          declaration_status?: Database["public"]["Enums"]["declaration_status"]
+          health_ministry_app_no?: string | null
+          hs_code?: string | null
+          id?: string
+          importer_name: string
+          importer_tin: string
+          last_updated?: string
+          national_bank_cleared_date?: string | null
+          remarks?: string | null
+          trade_ministry_app_no?: string | null
+        }
+        Update: {
+          assigned_agent?: string | null
+          attachments?: Json
+          bill_of_lading_number?: string | null
+          commodity?: string
+          contact_email?: string
+          contact_phone?: string
+          created_at?: string
+          created_by?: string | null
+          date_cleared_customs?: string | null
+          date_exited_port?: string | null
+          date_submitted?: string
+          declaration_number?: string
+          declaration_status?: Database["public"]["Enums"]["declaration_status"]
+          health_ministry_app_no?: string | null
+          hs_code?: string | null
+          id?: string
+          importer_name?: string
+          importer_tin?: string
+          last_updated?: string
+          national_bank_cleared_date?: string | null
+          remarks?: string | null
+          trade_ministry_app_no?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          declaration_id: string | null
+          declaration_number: string | null
+          id: string
+          recipient_email: string
+          status: string
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          declaration_id?: string | null
+          declaration_number?: string | null
+          id?: string
+          recipient_email: string
+          status?: string
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          declaration_id?: string | null
+          declaration_number?: string | null
+          id?: string
+          recipient_email?: string
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "client"
+      declaration_status:
+        | "Submitted"
+        | "Paid"
+        | "Cleared"
+        | "Exited"
+        | "Cancelled"
+        | "National Bank Cleared"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +348,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "client"],
+      declaration_status: [
+        "Submitted",
+        "Paid",
+        "Cleared",
+        "Exited",
+        "Cancelled",
+        "National Bank Cleared",
+      ],
+    },
   },
 } as const
