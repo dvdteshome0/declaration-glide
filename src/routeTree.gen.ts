@@ -11,8 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
+import { Route as ClientLoginRouteImport } from './routes/client-login'
 import { Route as AuthenticatedAdminAddDeclarationRouteImport } from './routes/_authenticated/admin.add-declaration'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin.dashboard'
+import { Route as AuthenticatedClientDashboardRouteImport } from './routes/_authenticated/client.dashboard'
 import { Route as AuthenticatedAdminDeclarationIdRouteImport } from './routes/_authenticated/admin.declaration.$id'
 import { Route as AuthenticatedAdminEditIdRouteImport } from './routes/_authenticated/admin.edit.$id'
 import { Route as AuthenticatedClientDeclarationIdRouteImport } from './routes/_authenticated/client.declaration.$id'
@@ -26,6 +29,16 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientLoginRoute = ClientLoginRouteImport.update({
+  id: '/client-login',
+  path: '/client-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminAddDeclarationRoute =
   AuthenticatedAdminAddDeclarationRouteImport.update({
     id: '/admin/add-declaration',
@@ -36,6 +49,12 @@ const AuthenticatedAdminDashboardRoute =
   AuthenticatedAdminDashboardRouteImport.update({
     id: '/admin/dashboard',
     path: '/admin/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedClientDashboardRoute =
+  AuthenticatedClientDashboardRouteImport.update({
+    id: '/client/dashboard',
+    path: '/client/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminDeclarationIdRoute =
@@ -59,16 +78,22 @@ const AuthenticatedClientDeclarationIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/client-login': typeof ClientLoginRoute
   '/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/client/dashboard': typeof AuthenticatedClientDashboardRoute
   '/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
   '/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
   '/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/client-login': typeof ClientLoginRoute
   '/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/client/dashboard': typeof AuthenticatedClientDashboardRoute
   '/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
   '/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
   '/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
@@ -77,8 +102,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
+  '/client-login': typeof ClientLoginRoute
   '/_authenticated/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/client/dashboard': typeof AuthenticatedClientDashboardRoute
   '/_authenticated/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
   '/_authenticated/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
   '/_authenticated/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
@@ -87,16 +115,22 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin-login'
+    | '/client-login'
     | '/admin/add-declaration'
     | '/admin/dashboard'
+    | '/client/dashboard'
     | '/admin/declaration/$id'
     | '/admin/edit/$id'
     | '/client/declaration/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin-login'
+    | '/client-login'
     | '/admin/add-declaration'
     | '/admin/dashboard'
+    | '/client/dashboard'
     | '/admin/declaration/$id'
     | '/admin/edit/$id'
     | '/client/declaration/$id'
@@ -104,8 +138,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin-login'
+    | '/client-login'
     | '/_authenticated/admin/add-declaration'
     | '/_authenticated/admin/dashboard'
+    | '/_authenticated/client/dashboard'
     | '/_authenticated/admin/declaration/$id'
     | '/_authenticated/admin/edit/$id'
     | '/_authenticated/client/declaration/$id'
@@ -114,6 +151,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
+  ClientLoginRoute: typeof ClientLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -132,6 +171,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client-login': {
+      id: '/client-login'
+      path: '/client-login'
+      fullPath: '/client-login'
+      preLoaderRoute: typeof ClientLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/add-declaration': {
       id: '/_authenticated/admin/add-declaration'
       path: '/admin/add-declaration'
@@ -144,6 +197,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/client/dashboard': {
+      id: '/_authenticated/client/dashboard'
+      path: '/client/dashboard'
+      fullPath: '/client/dashboard'
+      preLoaderRoute: typeof AuthenticatedClientDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/declaration/$id': {
@@ -173,6 +233,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAddDeclarationRoute: typeof AuthenticatedAdminAddDeclarationRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedClientDashboardRoute: typeof AuthenticatedClientDashboardRoute
   AuthenticatedAdminDeclarationIdRoute: typeof AuthenticatedAdminDeclarationIdRoute
   AuthenticatedAdminEditIdRoute: typeof AuthenticatedAdminEditIdRoute
   AuthenticatedClientDeclarationIdRoute: typeof AuthenticatedClientDeclarationIdRoute
@@ -181,6 +242,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAddDeclarationRoute: AuthenticatedAdminAddDeclarationRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedClientDashboardRoute: AuthenticatedClientDashboardRoute,
   AuthenticatedAdminDeclarationIdRoute: AuthenticatedAdminDeclarationIdRoute,
   AuthenticatedAdminEditIdRoute: AuthenticatedAdminEditIdRoute,
   AuthenticatedClientDeclarationIdRoute: AuthenticatedClientDeclarationIdRoute,
@@ -192,6 +254,8 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
+  ClientLoginRoute: ClientLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
