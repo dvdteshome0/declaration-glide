@@ -10,33 +10,149 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
+import { Route as ClientLoginRouteImport } from './routes/client-login'
+import { Route as AuthenticatedAdminAddDeclarationRouteImport } from './routes/_authenticated/admin.add-declaration'
+import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin.dashboard'
+import { Route as AuthenticatedClientDashboardRouteImport } from './routes/_authenticated/client.dashboard'
+import { Route as AuthenticatedAdminDeclarationIdRouteImport } from './routes/_authenticated/admin.declaration.$id'
+import { Route as AuthenticatedAdminEditIdRouteImport } from './routes/_authenticated/admin.edit.$id'
+import { Route as AuthenticatedClientDeclarationIdRouteImport } from './routes/_authenticated/client.declaration.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientLoginRoute = ClientLoginRouteImport.update({
+  id: '/client-login',
+  path: '/client-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminAddDeclarationRoute =
+  AuthenticatedAdminAddDeclarationRouteImport.update({
+    id: '/admin/add-declaration',
+    path: '/admin/add-declaration',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminDashboardRoute =
+  AuthenticatedAdminDashboardRouteImport.update({
+    id: '/admin/dashboard',
+    path: '/admin/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedClientDashboardRoute =
+  AuthenticatedClientDashboardRouteImport.update({
+    id: '/client/dashboard',
+    path: '/client/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminDeclarationIdRoute =
+  AuthenticatedAdminDeclarationIdRouteImport.update({
+    id: '/admin/declaration/$id',
+    path: '/admin/declaration/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminEditIdRoute =
+  AuthenticatedAdminEditIdRouteImport.update({
+    id: '/admin/edit/$id',
+    path: '/admin/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedClientDeclarationIdRoute =
+  AuthenticatedClientDeclarationIdRouteImport.update({
+    id: '/client/declaration/$id',
+    path: '/client/declaration/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/client-login': typeof ClientLoginRoute
+  '/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/client/dashboard': typeof AuthenticatedClientDashboardRoute
+  '/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
+  '/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
+  '/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin-login': typeof AdminLoginRoute
+  '/client-login': typeof ClientLoginRoute
+  '/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
+  '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/client/dashboard': typeof AuthenticatedClientDashboardRoute
+  '/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
+  '/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
+  '/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
+  '/client-login': typeof ClientLoginRoute
+  '/_authenticated/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
+  '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/client/dashboard': typeof AuthenticatedClientDashboardRoute
+  '/_authenticated/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
+  '/_authenticated/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
+  '/_authenticated/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin-login'
+    | '/client-login'
+    | '/admin/add-declaration'
+    | '/admin/dashboard'
+    | '/client/dashboard'
+    | '/admin/declaration/$id'
+    | '/admin/edit/$id'
+    | '/client/declaration/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin-login'
+    | '/client-login'
+    | '/admin/add-declaration'
+    | '/admin/dashboard'
+    | '/client/dashboard'
+    | '/admin/declaration/$id'
+    | '/admin/edit/$id'
+    | '/client/declaration/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/admin-login'
+    | '/client-login'
+    | '/_authenticated/admin/add-declaration'
+    | '/_authenticated/admin/dashboard'
+    | '/_authenticated/client/dashboard'
+    | '/_authenticated/admin/declaration/$id'
+    | '/_authenticated/admin/edit/$id'
+    | '/_authenticated/client/declaration/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
+  ClientLoginRoute: typeof ClientLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +164,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client-login': {
+      id: '/client-login'
+      path: '/client-login'
+      fullPath: '/client-login'
+      preLoaderRoute: typeof ClientLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/add-declaration': {
+      id: '/_authenticated/admin/add-declaration'
+      path: '/admin/add-declaration'
+      fullPath: '/admin/add-declaration'
+      preLoaderRoute: typeof AuthenticatedAdminAddDeclarationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/dashboard': {
+      id: '/_authenticated/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/client/dashboard': {
+      id: '/_authenticated/client/dashboard'
+      path: '/client/dashboard'
+      fullPath: '/client/dashboard'
+      preLoaderRoute: typeof AuthenticatedClientDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/declaration/$id': {
+      id: '/_authenticated/admin/declaration/$id'
+      path: '/admin/declaration/$id'
+      fullPath: '/admin/declaration/$id'
+      preLoaderRoute: typeof AuthenticatedAdminDeclarationIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/edit/$id': {
+      id: '/_authenticated/admin/edit/$id'
+      path: '/admin/edit/$id'
+      fullPath: '/admin/edit/$id'
+      preLoaderRoute: typeof AuthenticatedAdminEditIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/client/declaration/$id': {
+      id: '/_authenticated/client/declaration/$id'
+      path: '/client/declaration/$id'
+      fullPath: '/client/declaration/$id'
+      preLoaderRoute: typeof AuthenticatedClientDeclarationIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminAddDeclarationRoute: typeof AuthenticatedAdminAddDeclarationRoute
+  AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedClientDashboardRoute: typeof AuthenticatedClientDashboardRoute
+  AuthenticatedAdminDeclarationIdRoute: typeof AuthenticatedAdminDeclarationIdRoute
+  AuthenticatedAdminEditIdRoute: typeof AuthenticatedAdminEditIdRoute
+  AuthenticatedClientDeclarationIdRoute: typeof AuthenticatedClientDeclarationIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminAddDeclarationRoute: AuthenticatedAdminAddDeclarationRoute,
+  AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedClientDashboardRoute: AuthenticatedClientDashboardRoute,
+  AuthenticatedAdminDeclarationIdRoute: AuthenticatedAdminDeclarationIdRoute,
+  AuthenticatedAdminEditIdRoute: AuthenticatedAdminEditIdRoute,
+  AuthenticatedClientDeclarationIdRoute: AuthenticatedClientDeclarationIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
+  ClientLoginRoute: ClientLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
