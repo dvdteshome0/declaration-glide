@@ -39,7 +39,7 @@ function EditDeclaration() {
         {isLoading ? (
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         ) : (
-          <DeclarationForm declaration={data} />
+          <DeclarationForm declaration={data ?? null} />
         )}
       </main>
     </div>
