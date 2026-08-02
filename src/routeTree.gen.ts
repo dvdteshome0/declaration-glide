@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedAdminAddDeclarationRouteImport } from './routes/_authenticated/admin.add-declaration'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin.dashboard'
+import { Route as AuthenticatedAdminDeclarationIdRouteImport } from './routes/_authenticated/admin.declaration.$id'
 import { Route as AuthenticatedAdminEditIdRouteImport } from './routes/_authenticated/admin.edit.$id'
+import { Route as AuthenticatedClientDeclarationIdRouteImport } from './routes/_authenticated/client.declaration.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -36,10 +38,22 @@ const AuthenticatedAdminDashboardRoute =
     path: '/admin/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDeclarationIdRoute =
+  AuthenticatedAdminDeclarationIdRouteImport.update({
+    id: '/admin/declaration/$id',
+    path: '/admin/declaration/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminEditIdRoute =
   AuthenticatedAdminEditIdRouteImport.update({
     id: '/admin/edit/$id',
     path: '/admin/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedClientDeclarationIdRoute =
+  AuthenticatedClientDeclarationIdRouteImport.update({
+    id: '/client/declaration/$id',
+    path: '/client/declaration/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -47,13 +61,17 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
   '/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
+  '/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
   '/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
+  '/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,21 +79,36 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_authenticated/admin/add-declaration': typeof AuthenticatedAdminAddDeclarationRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
+  '/_authenticated/admin/declaration/$id': typeof AuthenticatedAdminDeclarationIdRoute
   '/_authenticated/admin/edit/$id': typeof AuthenticatedAdminEditIdRoute
+  '/_authenticated/client/declaration/$id': typeof AuthenticatedClientDeclarationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/admin/add-declaration' | '/admin/dashboard' | '/admin/edit/$id'
+    | '/'
+    | '/admin/add-declaration'
+    | '/admin/dashboard'
+    | '/admin/declaration/$id'
+    | '/admin/edit/$id'
+    | '/client/declaration/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/add-declaration' | '/admin/dashboard' | '/admin/edit/$id'
+  to:
+    | '/'
+    | '/admin/add-declaration'
+    | '/admin/dashboard'
+    | '/admin/declaration/$id'
+    | '/admin/edit/$id'
+    | '/client/declaration/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/_authenticated/admin/add-declaration'
     | '/_authenticated/admin/dashboard'
+    | '/_authenticated/admin/declaration/$id'
     | '/_authenticated/admin/edit/$id'
+    | '/_authenticated/client/declaration/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -113,11 +146,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/declaration/$id': {
+      id: '/_authenticated/admin/declaration/$id'
+      path: '/admin/declaration/$id'
+      fullPath: '/admin/declaration/$id'
+      preLoaderRoute: typeof AuthenticatedAdminDeclarationIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/edit/$id': {
       id: '/_authenticated/admin/edit/$id'
       path: '/admin/edit/$id'
       fullPath: '/admin/edit/$id'
       preLoaderRoute: typeof AuthenticatedAdminEditIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/client/declaration/$id': {
+      id: '/_authenticated/client/declaration/$id'
+      path: '/client/declaration/$id'
+      fullPath: '/client/declaration/$id'
+      preLoaderRoute: typeof AuthenticatedClientDeclarationIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -126,13 +173,17 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAddDeclarationRoute: typeof AuthenticatedAdminAddDeclarationRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
+  AuthenticatedAdminDeclarationIdRoute: typeof AuthenticatedAdminDeclarationIdRoute
   AuthenticatedAdminEditIdRoute: typeof AuthenticatedAdminEditIdRoute
+  AuthenticatedClientDeclarationIdRoute: typeof AuthenticatedClientDeclarationIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAddDeclarationRoute: AuthenticatedAdminAddDeclarationRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
+  AuthenticatedAdminDeclarationIdRoute: AuthenticatedAdminDeclarationIdRoute,
   AuthenticatedAdminEditIdRoute: AuthenticatedAdminEditIdRoute,
+  AuthenticatedClientDeclarationIdRoute: AuthenticatedClientDeclarationIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
