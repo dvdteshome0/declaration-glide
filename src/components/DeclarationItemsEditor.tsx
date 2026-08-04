@@ -8,7 +8,7 @@ import { emptyItem, itemLineTotal, type DeclarationItem } from "@/lib/declaratio
 interface Props {
   items: DeclarationItem[];
   onChange: (items: DeclarationItem[]) => void;
-  error?: string;
+  error?: string | undefined;
 }
 
 function toNumber(value: string): number | null {

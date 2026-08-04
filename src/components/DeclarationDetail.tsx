@@ -4,7 +4,13 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { downloadAttachment, formatDate, formatDateTime, type Declaration } from "@/lib/declarations";
+import {
+  downloadAttachment,
+  formatDate,
+  formatDateTime,
+  itemLineTotal,
+  type Declaration,
+} from "@/lib/declarations";
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -46,6 +52,54 @@ export function DeclarationDetail({ declaration }: { declaration: Declaration })
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="shadow-card lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Declared items ({declaration.items?.length ?? 0})</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            {!declaration.items?.length ? (
+              <p className="text-sm text-muted-foreground">No items recorded.</p>
+            ) : (
+              <table className="w-full min-w-[640px] text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs tracking-wide text-muted-foreground uppercase">
+                    <th className="py-2 pr-3">#</th>
+                    <th className="py-2 pr-3">Description</th>
+                    <th className="py-2 pr-3">HS code</th>
+                    <th className="py-2 pr-3">Origin</th>
+                    <th className="py-2 pr-3">Qty</th>
+                    <th className="py-2 pr-3">Unit value</th>
+                    <th className="py-2">Line total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {declaration.items.map((item, index) => (
+                    <tr key={item.id ?? index} className="border-b border-border/60 last:border-0">
+                      <td className="py-2 pr-3 text-muted-foreground">{index + 1}</td>
+                      <td className="py-2 pr-3 font-medium">{item.description}</td>
+                      <td className="py-2 pr-3">{item.hs_code || "—"}</td>
+                      <td className="py-2 pr-3">{item.country_of_origin || "—"}</td>
+                      <td className="py-2 pr-3">
+                        {item.quantity != null ? `${item.quantity} ${item.unit ?? ""}`.trim() : "—"}
+                      </td>
+                      <td className="py-2 pr-3">
+                        {item.unit_value != null
+                          ? `${item.unit_value.toLocaleString()} ${item.currency}`
+                          : "—"}
+                      </td>
+                      <td className="py-2">
+                        {itemLineTotal(item) != null
+                          ? `${itemLineTotal(item)!.toLocaleString()} ${item.currency}`
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle>Importer</CardTitle>
