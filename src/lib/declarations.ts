@@ -18,6 +18,44 @@ export interface Attachment {
   size?: number;
 }
 
+export interface DeclarationItem {
+  id?: string;
+  declaration_id?: string;
+  position: number;
+  description: string;
+  hs_code: string | null;
+  quantity: number | null;
+  unit: string | null;
+  unit_value: number | null;
+  currency: string;
+  country_of_origin: string | null;
+}
+
+export function emptyItem(position: number): DeclarationItem {
+  return {
+    position,
+    description: "",
+    hs_code: "",
+    quantity: null,
+    unit: "",
+    unit_value: null,
+    currency: "USD",
+    country_of_origin: "",
+  };
+}
+
+export function itemLineTotal(item: DeclarationItem) {
+  if (item.quantity == null || item.unit_value == null) return null;
+  return item.quantity * item.unit_value;
+}
+
+export function summarizeItems(items: DeclarationItem[]) {
+  const named = items.map((item) => item.description.trim()).filter(Boolean);
+  if (named.length === 0) return "";
+  if (named.length === 1) return named[0]!;
+  return `${named[0]} + ${named.length - 1} more item${named.length > 2 ? "s" : ""}`;
+}
+
 export interface Declaration {
   id: string;
   importer_name: string;
@@ -39,6 +77,7 @@ export interface Declaration {
   assigned_agent: string | null;
   remarks: string | null;
   attachments: Attachment[];
+  items?: DeclarationItem[];
 }
 
 export const STATUS_STYLES: Record<DeclarationStatus, string> = {
@@ -88,12 +127,44 @@ export async function fetchDeclarations(): Promise<Declaration[]> {
 export async function fetchDeclaration(id: string): Promise<Declaration> {
   const { data, error } = await supabase
     .from("import_declarations")
-    .select("*")
+    .select("*, declaration_items(*)")
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("Declaration not found");
-  return normalize([data])[0]!;
+  const { declaration_items, ...row } = data as typeof data & {
+    declaration_items?: DeclarationItem[];
+  };
+  const declaration = normalize([row])[0]!;
+  declaration.items = (declaration_items ?? []).sort((a, b) => a.position - b.position);
+  return declaration;
+}
+
+export async function saveDeclarationItems(declarationId: string, items: DeclarationItem[]) {
+  const { error: deleteError } = await supabase
+    .from("declaration_items")
+    .delete()
+    .eq("declaration_id", declarationId);
+  if (deleteError) throw deleteError;
+
+  const rows = items
+    .filter((item) => item.description.trim())
+    .map((item, index) => ({
+      declaration_id: declarationId,
+      position: index + 1,
+      description: item.description.trim(),
+      hs_code: item.hs_code?.trim() || null,
+      quantity: item.quantity,
+      unit: item.unit?.trim() || null,
+      unit_value: item.unit_value,
+      currency: item.currency?.trim() || "USD",
+      country_of_origin: item.country_of_origin?.trim() || null,
+    }));
+
+  if (rows.length) {
+    const { error } = await supabase.from("declaration_items").insert(rows);
+    if (error) throw error;
+  }
 }
 
 export function formatDate(value?: string | null) {
