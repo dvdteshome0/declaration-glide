@@ -20,19 +20,23 @@ import {
   ATTACHMENT_BUCKET,
   DECLARATION_STATUSES,
   STATUS_DOT,
+  emptyItem,
+  saveDeclarationItems,
+  summarizeItems,
   type Attachment,
   type Declaration,
+  type DeclarationItem,
   type DeclarationStatus,
 } from "@/lib/declarations";
 import { cn } from "@/lib/utils";
+import { DeclarationItemsEditor } from "@/components/DeclarationItemsEditor";
+import { AmendmentPreview, type AmendmentChange } from "@/components/AmendmentPreview";
 
 const schema = z.object({
   importer_name: z.string().trim().min(2, "Importer name is required").max(120),
   importer_tin: z.string().trim().min(3, "TIN is required").max(40),
   contact_phone: z.string().trim().min(6, "Contact phone is required").max(30),
   contact_email: z.string().trim().email("Enter a valid email address").max(255),
-  commodity: z.string().trim().min(2, "Commodity is required").max(200),
-  hs_code: z.string().trim().max(20).optional().or(z.literal("")),
   declaration_number: z
     .string()
     .trim()
@@ -56,8 +60,6 @@ function initialValues(declaration?: Declaration | null): FormValues {
     importer_tin: declaration?.importer_tin ?? "",
     contact_phone: declaration?.contact_phone ?? "",
     contact_email: declaration?.contact_email ?? "",
-    commodity: declaration?.commodity ?? "",
-    hs_code: declaration?.hs_code ?? "",
     declaration_number: declaration?.declaration_number ?? "",
     bill_of_lading_number: declaration?.bill_of_lading_number ?? "",
     health_ministry_app_no: declaration?.health_ministry_app_no ?? "",
@@ -71,6 +73,17 @@ function initialValues(declaration?: Declaration | null): FormValues {
   };
 }
 
+function itemsToLines(items: DeclarationItem[]) {
+  return items
+    .filter((item) => item.description.trim())
+    .map(
+      (item, index) =>
+        `${index + 1}. ${item.description.trim()}${item.hs_code?.trim() ? ` (HS ${item.hs_code.trim()})` : ""}` +
+        `${item.quantity != null ? ` × ${item.quantity}${item.unit ? ` ${item.unit}` : ""}` : ""}`,
+    )
+    .join("\n");
+}
+
 export function DeclarationForm({ declaration }: { declaration?: Declaration | null }) {
   const navigate = useNavigate();
   const [values, setValues] = useState<FormValues>(() => initialValues(declaration));
@@ -78,6 +91,20 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
   const [attachments, setAttachments] = useState<Attachment[]>(declaration?.attachments ?? []);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
+  const [items, setItems] = useState<DeclarationItem[]>(() =>
+    declaration?.items?.length
+      ? declaration.items.map((item) => ({ ...item }))
+      : [
+          {
+            ...emptyItem(1),
+            description: declaration?.commodity ?? "",
+            hs_code: declaration?.hs_code ?? "",
+          },
+        ],
+  );
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [changes, setChanges] = useState<AmendmentChange[]>([]);
+  const [pendingPayload, setPendingPayload] = useState<Record<string, unknown> | null>(null);
 
   const set = (key: keyof FormValues, value: string) =>
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -109,40 +136,49 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
     return uploaded;
   };
 
-  const onSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const parsed = schema.safeParse(values);
-    if (!parsed.success) {
-      const next: Record<string, string> = {};
-      for (const issue of parsed.error.issues) next[String(issue.path[0])] = issue.message;
-      setErrors(next);
-      toast.error("Please correct the highlighted fields.");
-      return;
-    }
-    if (
-      parsed.data.declaration_status === "National Bank Cleared" &&
-      !parsed.data.national_bank_cleared_date
-    ) {
-      setErrors({ national_bank_cleared_date: "Required for National Bank Cleared status" });
-      toast.error("National Bank cleared date is required.");
-      return;
-    }
-    setErrors({});
-    setSaving(true);
-
-    const payload = {
-      ...parsed.data,
-      hs_code: parsed.data.hs_code || null,
-      bill_of_lading_number: parsed.data.bill_of_lading_number || null,
-      health_ministry_app_no: parsed.data.health_ministry_app_no || null,
-      trade_ministry_app_no: parsed.data.trade_ministry_app_no || null,
-      national_bank_cleared_date: parsed.data.national_bank_cleared_date || null,
-      date_cleared_customs: parsed.data.date_cleared_customs || null,
-      date_exited_port: parsed.data.date_exited_port || null,
-      assigned_agent: parsed.data.assigned_agent || null,
-      remarks: parsed.data.remarks || null,
+  const buildChanges = (payload: Record<string, unknown>): AmendmentChange[] => {
+    if (!declaration) return [];
+    const labels: Record<string, string> = {
+      importer_name: "Importer name",
+      importer_tin: "Importer TIN",
+      contact_phone: "Contact phone",
+      contact_email: "Contact email",
+      declaration_number: "Declaration number",
+      bill_of_lading_number: "Bill of lading",
+      health_ministry_app_no: "Health Ministry approval",
+      trade_ministry_app_no: "Trade Ministry approval",
+      declaration_status: "Status",
+      national_bank_cleared_date: "National Bank cleared date",
+      date_cleared_customs: "Date cleared customs",
+      date_exited_port: "Date exited port",
+      assigned_agent: "Assigned agent",
+      remarks: "Remarks",
     };
+    const list: AmendmentChange[] = [];
+    for (const [key, label] of Object.entries(labels)) {
+      const before = (declaration as unknown as Record<string, unknown>)[key];
+      const after = payload[key];
+      if (String(before ?? "") !== String(after ?? "")) {
+        list.push({ label, before: String(before ?? ""), after: String(after ?? "") });
+      }
+    }
+    const beforeItems = itemsToLines(declaration.items ?? []);
+    const afterItems = itemsToLines(items);
+    if (beforeItems !== afterItems) {
+      list.push({ label: "Declared items", before: beforeItems, after: afterItems });
+    }
+    if (pendingFiles.length) {
+      list.push({
+        label: "New attachments",
+        before: `${attachments.length} file(s)`,
+        after: `${attachments.length + pendingFiles.length} file(s)`,
+      });
+    }
+    return list;
+  };
 
+  const persist = async (payload: Record<string, unknown>) => {
+    setSaving(true);
     try {
       if (declaration) {
         const uploaded = await uploadFiles(declaration.id);
@@ -151,15 +187,18 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
           .update({ ...payload, attachments: [...attachments, ...uploaded] })
           .eq("id", declaration.id);
         if (error) throw error;
-        toast.success("Declaration updated.");
+        await saveDeclarationItems(declaration.id, items);
+        toast.success("Amendment saved.");
+        setPreviewOpen(false);
         navigate({ to: "/admin/declaration/$id", params: { id: declaration.id } });
       } else {
         const { data, error } = await supabase
           .from("import_declarations")
-          .insert(payload)
+          .insert(payload as never)
           .select("id")
           .single();
         if (error) throw error;
+        await saveDeclarationItems(data.id, items);
         const uploaded = await uploadFiles(data.id);
         if (uploaded.length) {
           await supabase
@@ -180,6 +219,55 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
     } finally {
       setSaving(false);
     }
+  };
+
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const parsed = schema.safeParse(values);
+    if (!parsed.success) {
+      const next: Record<string, string> = {};
+      for (const issue of parsed.error.issues) next[String(issue.path[0])] = issue.message;
+      setErrors(next);
+      toast.error("Please correct the highlighted fields.");
+      return;
+    }
+    const validItems = items.filter((item) => item.description.trim());
+    if (validItems.length === 0) {
+      setErrors({ items: "Add at least one item with a description" });
+      toast.error("Add at least one declared item.");
+      return;
+    }
+    if (
+      parsed.data.declaration_status === "National Bank Cleared" &&
+      !parsed.data.national_bank_cleared_date
+    ) {
+      setErrors({ national_bank_cleared_date: "Required for National Bank Cleared status" });
+      toast.error("National Bank cleared date is required.");
+      return;
+    }
+    setErrors({});
+
+    const payload = {
+      ...parsed.data,
+      commodity: summarizeItems(validItems),
+      hs_code: validItems[0]?.hs_code?.trim() || null,
+      bill_of_lading_number: parsed.data.bill_of_lading_number || null,
+      health_ministry_app_no: parsed.data.health_ministry_app_no || null,
+      trade_ministry_app_no: parsed.data.trade_ministry_app_no || null,
+      national_bank_cleared_date: parsed.data.national_bank_cleared_date || null,
+      date_cleared_customs: parsed.data.date_cleared_customs || null,
+      date_exited_port: parsed.data.date_exited_port || null,
+      assigned_agent: parsed.data.assigned_agent || null,
+      remarks: parsed.data.remarks || null,
+    };
+
+    if (declaration) {
+      setChanges(buildChanges(payload));
+      setPendingPayload(payload);
+      setPreviewOpen(true);
+      return;
+    }
+    await persist(payload);
   };
 
   const removeExisting = async (attachment: Attachment) => {
@@ -206,8 +294,6 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
           <CardTitle>Consignment &amp; documents</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          {field("commodity", "Commodity", true)}
-          {field("hs_code", "HS code")}
           {field("declaration_number", "Declaration number (YYYY-NNNNNN)", true)}
           {field("bill_of_lading_number", "Bill of lading number")}
           {field("health_ministry_app_no", "Health Ministry approval no.")}
@@ -215,6 +301,8 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
           {field("assigned_agent", "Assigned agent")}
         </CardContent>
       </Card>
+
+      <DeclarationItemsEditor items={items} onChange={setItems} error={errors['items']} />
 
       <Card className="shadow-card">
         <CardHeader>
@@ -309,12 +397,20 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={saving}>
           {saving && <Loader2 className="size-4 animate-spin" />}
-          {declaration ? "Save changes" : "Create declaration"}
+          {declaration ? "Preview amendment" : "Create declaration"}
         </Button>
         <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/dashboard" })}>
           Cancel
         </Button>
       </div>
+
+      <AmendmentPreview
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        changes={changes}
+        saving={saving}
+        onConfirm={() => pendingPayload && persist(pendingPayload)}
+      />
     </form>
   );
 }

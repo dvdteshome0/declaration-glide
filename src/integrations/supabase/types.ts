@@ -50,6 +50,59 @@ export type Database = {
         }
         Relationships: []
       }
+      declaration_items: {
+        Row: {
+          country_of_origin: string | null
+          created_at: string
+          currency: string
+          declaration_id: string
+          description: string
+          hs_code: string | null
+          id: string
+          position: number
+          quantity: number | null
+          unit: string | null
+          unit_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          country_of_origin?: string | null
+          created_at?: string
+          currency?: string
+          declaration_id: string
+          description: string
+          hs_code?: string | null
+          id?: string
+          position?: number
+          quantity?: number | null
+          unit?: string | null
+          unit_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          country_of_origin?: string | null
+          created_at?: string
+          currency?: string
+          declaration_id?: string
+          description?: string
+          hs_code?: string | null
+          id?: string
+          position?: number
+          quantity?: number | null
+          unit?: string | null
+          unit_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "declaration_items_declaration_id_fkey"
+            columns: ["declaration_id"]
+            isOneToOne: false
+            referencedRelation: "import_declarations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_declarations: {
         Row: {
           assigned_agent: string | null
