@@ -186,6 +186,11 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
     if (beforeItems !== afterItems) {
       list.push({ label: "Declared items", before: beforeItems, after: afterItems });
     }
+    const beforePayments = paymentsToLines(declaration.payments ?? []);
+    const afterPayments = paymentsToLines(payments);
+    if (beforePayments !== afterPayments) {
+      list.push({ label: "Payments collected", before: beforePayments, after: afterPayments });
+    }
     if (pendingFiles.length) {
       list.push({
         label: "New attachments",
