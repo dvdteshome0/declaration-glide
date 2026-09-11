@@ -103,6 +103,56 @@ export type Database = {
           },
         ]
       }
+      declaration_payments: {
+        Row: {
+          amount_birr: number
+          basis: Database["public"]["Enums"]["payment_basis"]
+          collected_by: string | null
+          collected_on: string
+          created_at: string
+          declaration_id: string
+          id: string
+          note: string | null
+          other_reason: string | null
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          amount_birr?: number
+          basis?: Database["public"]["Enums"]["payment_basis"]
+          collected_by?: string | null
+          collected_on?: string
+          created_at?: string
+          declaration_id: string
+          id?: string
+          note?: string | null
+          other_reason?: string | null
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_birr?: number
+          basis?: Database["public"]["Enums"]["payment_basis"]
+          collected_by?: string | null
+          collected_on?: string
+          created_at?: string
+          declaration_id?: string
+          id?: string
+          note?: string | null
+          other_reason?: string | null
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "declaration_payments_declaration_id_fkey"
+            columns: ["declaration_id"]
+            isOneToOne: false
+            referencedRelation: "import_declarations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_declarations: {
         Row: {
           assigned_agent: string | null
@@ -275,6 +325,7 @@ export type Database = {
         | "Exited"
         | "Cancelled"
         | "National Bank Cleared"
+      payment_basis: "Per truck" | "Per declaration" | "Other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -411,6 +462,7 @@ export const Constants = {
         "Cancelled",
         "National Bank Cleared",
       ],
+      payment_basis: ["Per truck", "Per declaration", "Other"],
     },
   },
 } as const
