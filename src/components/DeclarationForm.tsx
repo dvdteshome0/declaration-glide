@@ -224,6 +224,7 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
           .single();
         if (error) throw error;
         await saveDeclarationItems(data.id, items);
+        await saveDeclarationPayments(data.id, payments);
         const uploaded = await uploadFiles(data.id);
         if (uploaded.length) {
           await supabase
