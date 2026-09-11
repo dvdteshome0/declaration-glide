@@ -271,6 +271,18 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
       toast.error("National Bank cleared date is required.");
       return;
     }
+    const invalidPayment = payments.some(
+      (payment) =>
+        payment.amount_birr != null &&
+        payment.amount_birr > 0 &&
+        payment.basis === "Other" &&
+        !payment.other_reason?.trim(),
+    );
+    if (invalidPayment) {
+      setErrors({ payments: "Write the reason for collection when 'Other' is selected" });
+      toast.error("Add a reason for the 'Other' payment.");
+      return;
+    }
     setErrors({});
 
     const payload = {
