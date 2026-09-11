@@ -21,15 +21,20 @@ import {
   DECLARATION_STATUSES,
   STATUS_DOT,
   emptyItem,
+  formatBirr,
+  paymentReason,
   saveDeclarationItems,
+  saveDeclarationPayments,
   summarizeItems,
   type Attachment,
   type Declaration,
   type DeclarationItem,
+  type DeclarationPayment,
   type DeclarationStatus,
 } from "@/lib/declarations";
 import { cn } from "@/lib/utils";
 import { DeclarationItemsEditor } from "@/components/DeclarationItemsEditor";
+import { DeclarationPaymentsEditor } from "@/components/DeclarationPaymentsEditor";
 import { AmendmentPreview, type AmendmentChange } from "@/components/AmendmentPreview";
 
 const schema = z.object({
