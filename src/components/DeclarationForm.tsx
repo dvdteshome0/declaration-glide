@@ -212,6 +212,7 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
           .eq("id", declaration.id);
         if (error) throw error;
         await saveDeclarationItems(declaration.id, items);
+        await saveDeclarationPayments(declaration.id, payments);
         toast.success("Amendment saved.");
         setPreviewOpen(false);
         navigate({ to: "/admin/declaration/$id", params: { id: declaration.id } });
