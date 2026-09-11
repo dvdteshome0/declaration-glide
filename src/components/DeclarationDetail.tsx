@@ -103,6 +103,55 @@ export function DeclarationDetail({ declaration }: { declaration: Declaration })
           </CardContent>
         </Card>
 
+        <Card className="shadow-card lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Payments collected (Ethiopian Birr)</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            {!declaration.payments?.length ? (
+              <p className="text-sm text-muted-foreground">No payments recorded yet.</p>
+            ) : (
+              <>
+                <table className="w-full min-w-[520px] text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs tracking-wide text-muted-foreground uppercase">
+                      <th className="py-2 pr-3">#</th>
+                      <th className="py-2 pr-3">Amount</th>
+                      <th className="py-2 pr-3">Charged</th>
+                      <th className="py-2 pr-3">Date</th>
+                      <th className="py-2">Collected by</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {declaration.payments.map((payment, index) => (
+                      <tr
+                        key={payment.id ?? index}
+                        className="border-b border-border/60 last:border-0"
+                      >
+                        <td className="py-2 pr-3 text-muted-foreground">{index + 1}</td>
+                        <td className="py-2 pr-3 font-medium">{formatBirr(payment.amount_birr)}</td>
+                        <td className="py-2 pr-3">
+                          {paymentReason(payment)}
+                          {payment.note ? (
+                            <span className="block text-xs text-muted-foreground">
+                              {payment.note}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td className="py-2 pr-3">{formatDate(payment.collected_on)}</td>
+                        <td className="py-2">{payment.collected_by || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="mt-3 text-sm font-semibold">
+                  Total collected: {formatBirr(paymentsTotal(declaration.payments))}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle>Importer</CardTitle>
