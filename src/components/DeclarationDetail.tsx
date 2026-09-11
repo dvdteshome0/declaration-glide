@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   downloadAttachment,
+  formatBirr,
   formatDate,
   formatDateTime,
   itemLineTotal,
+  paymentReason,
+  paymentsTotal,
   type Declaration,
 } from "@/lib/declarations";
 
