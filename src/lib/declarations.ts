@@ -197,16 +197,18 @@ export async function fetchDeclarations(): Promise<Declaration[]> {
 export async function fetchDeclaration(id: string): Promise<Declaration> {
   const { data, error } = await supabase
     .from("import_declarations")
-    .select("*, declaration_items(*)")
+    .select("*, declaration_items(*), declaration_payments(*)")
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("Declaration not found");
-  const { declaration_items, ...row } = data as typeof data & {
+  const { declaration_items, declaration_payments, ...row } = data as typeof data & {
     declaration_items?: DeclarationItem[];
+    declaration_payments?: DeclarationPayment[];
   };
   const declaration = normalize([row])[0]!;
   declaration.items = (declaration_items ?? []).sort((a, b) => a.position - b.position);
+  declaration.payments = (declaration_payments ?? []).sort((a, b) => a.position - b.position);
   return declaration;
 }
 
