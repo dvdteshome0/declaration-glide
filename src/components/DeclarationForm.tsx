@@ -118,6 +118,9 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
           },
         ],
   );
+  const [payments, setPayments] = useState<DeclarationPayment[]>(() =>
+    declaration?.payments?.length ? declaration.payments.map((payment) => ({ ...payment })) : [],
+  );
   const [previewOpen, setPreviewOpen] = useState(false);
   const [changes, setChanges] = useState<AmendmentChange[]>([]);
   const [pendingPayload, setPendingPayload] = useState<Record<string, unknown> | null>(null);
