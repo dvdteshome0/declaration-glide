@@ -342,6 +342,12 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
 
       <DeclarationItemsEditor items={items} onChange={setItems} error={errors['items']} />
 
+      <DeclarationPaymentsEditor
+        payments={payments}
+        onChange={setPayments}
+        error={errors['payments']}
+      />
+
       <Card className="shadow-card">
         <CardHeader>
           <CardTitle>Clearance status</CardTitle>
