@@ -147,6 +147,7 @@ export interface Declaration {
   remarks: string | null;
   attachments: Attachment[];
   items?: DeclarationItem[];
+  payments?: DeclarationPayment[];
 }
 
 export const STATUS_STYLES: Record<DeclarationStatus, string> = {
