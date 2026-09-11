@@ -21,15 +21,20 @@ import {
   DECLARATION_STATUSES,
   STATUS_DOT,
   emptyItem,
+  formatBirr,
+  paymentReason,
   saveDeclarationItems,
+  saveDeclarationPayments,
   summarizeItems,
   type Attachment,
   type Declaration,
   type DeclarationItem,
+  type DeclarationPayment,
   type DeclarationStatus,
 } from "@/lib/declarations";
 import { cn } from "@/lib/utils";
 import { DeclarationItemsEditor } from "@/components/DeclarationItemsEditor";
+import { DeclarationPaymentsEditor } from "@/components/DeclarationPaymentsEditor";
 import { AmendmentPreview, type AmendmentChange } from "@/components/AmendmentPreview";
 
 const schema = z.object({
@@ -84,6 +89,17 @@ function itemsToLines(items: DeclarationItem[]) {
     .join("\n");
 }
 
+function paymentsToLines(payments: DeclarationPayment[]) {
+  return payments
+    .filter((payment) => payment.amount_birr != null && payment.amount_birr > 0)
+    .map(
+      (payment, index) =>
+        `${index + 1}. ${formatBirr(payment.amount_birr)} — ${paymentReason(payment)}` +
+        `${payment.collected_on ? ` (${payment.collected_on})` : ""}`,
+    )
+    .join("\n");
+}
+
 export function DeclarationForm({ declaration }: { declaration?: Declaration | null }) {
   const navigate = useNavigate();
   const [values, setValues] = useState<FormValues>(() => initialValues(declaration));
@@ -101,6 +117,9 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
             hs_code: declaration?.hs_code ?? "",
           },
         ],
+  );
+  const [payments, setPayments] = useState<DeclarationPayment[]>(() =>
+    declaration?.payments?.length ? declaration.payments.map((payment) => ({ ...payment })) : [],
   );
   const [previewOpen, setPreviewOpen] = useState(false);
   const [changes, setChanges] = useState<AmendmentChange[]>([]);
@@ -167,6 +186,11 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
     if (beforeItems !== afterItems) {
       list.push({ label: "Declared items", before: beforeItems, after: afterItems });
     }
+    const beforePayments = paymentsToLines(declaration.payments ?? []);
+    const afterPayments = paymentsToLines(payments);
+    if (beforePayments !== afterPayments) {
+      list.push({ label: "Payments collected", before: beforePayments, after: afterPayments });
+    }
     if (pendingFiles.length) {
       list.push({
         label: "New attachments",
@@ -188,6 +212,7 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
           .eq("id", declaration.id);
         if (error) throw error;
         await saveDeclarationItems(declaration.id, items);
+        await saveDeclarationPayments(declaration.id, payments);
         toast.success("Amendment saved.");
         setPreviewOpen(false);
         navigate({ to: "/admin/declaration/$id", params: { id: declaration.id } });
@@ -199,6 +224,7 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
           .single();
         if (error) throw error;
         await saveDeclarationItems(data.id, items);
+        await saveDeclarationPayments(data.id, payments);
         const uploaded = await uploadFiles(data.id);
         if (uploaded.length) {
           await supabase
@@ -243,6 +269,18 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
     ) {
       setErrors({ national_bank_cleared_date: "Required for National Bank Cleared status" });
       toast.error("National Bank cleared date is required.");
+      return;
+    }
+    const invalidPayment = payments.some(
+      (payment) =>
+        payment.amount_birr != null &&
+        payment.amount_birr > 0 &&
+        payment.basis === "Other" &&
+        !payment.other_reason?.trim(),
+    );
+    if (invalidPayment) {
+      setErrors({ payments: "Write the reason for collection when 'Other' is selected" });
+      toast.error("Add a reason for the 'Other' payment.");
       return;
     }
     setErrors({});
@@ -303,6 +341,12 @@ export function DeclarationForm({ declaration }: { declaration?: Declaration | n
       </Card>
 
       <DeclarationItemsEditor items={items} onChange={setItems} error={errors['items']} />
+
+      <DeclarationPaymentsEditor
+        payments={payments}
+        onChange={setPayments}
+        error={errors['payments']}
+      />
 
       <Card className="shadow-card">
         <CardHeader>

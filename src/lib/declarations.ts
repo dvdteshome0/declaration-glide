@@ -56,6 +56,75 @@ export function summarizeItems(items: DeclarationItem[]) {
   return `${named[0]} + ${named.length - 1} more item${named.length > 2 ? "s" : ""}`;
 }
 
+export const PAYMENT_BASES = ["Per truck", "Per declaration", "Other"] as const;
+export type PaymentBasis = (typeof PAYMENT_BASES)[number];
+
+export interface DeclarationPayment {
+  id?: string;
+  declaration_id?: string;
+  position: number;
+  amount_birr: number | null;
+  basis: PaymentBasis;
+  other_reason: string | null;
+  collected_on: string;
+  collected_by: string | null;
+  note: string | null;
+}
+
+export function emptyPayment(position: number): DeclarationPayment {
+  return {
+    position,
+    amount_birr: null,
+    basis: "Per declaration",
+    other_reason: "",
+    collected_on: new Date().toISOString().slice(0, 10),
+    collected_by: "",
+    note: "",
+  };
+}
+
+export function paymentsTotal(payments: DeclarationPayment[]) {
+  return payments.reduce((sum, payment) => sum + (payment.amount_birr ?? 0), 0);
+}
+
+export function formatBirr(value: number | null | undefined) {
+  if (value == null) return "—";
+  return `ETB ${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+export function paymentReason(payment: DeclarationPayment) {
+  return payment.basis === "Other" ? payment.other_reason?.trim() || "Other" : payment.basis;
+}
+
+export async function saveDeclarationPayments(
+  declarationId: string,
+  payments: DeclarationPayment[],
+) {
+  const { error: deleteError } = await supabase
+    .from("declaration_payments")
+    .delete()
+    .eq("declaration_id", declarationId);
+  if (deleteError) throw deleteError;
+
+  const rows = payments
+    .filter((payment) => payment.amount_birr != null && payment.amount_birr > 0)
+    .map((payment, index) => ({
+      declaration_id: declarationId,
+      position: index + 1,
+      amount_birr: payment.amount_birr as number,
+      basis: payment.basis,
+      other_reason: payment.basis === "Other" ? payment.other_reason?.trim() || null : null,
+      collected_on: payment.collected_on || new Date().toISOString().slice(0, 10),
+      collected_by: payment.collected_by?.trim() || null,
+      note: payment.note?.trim() || null,
+    }));
+
+  if (rows.length) {
+    const { error } = await supabase.from("declaration_payments").insert(rows);
+    if (error) throw error;
+  }
+}
+
 export interface Declaration {
   id: string;
   importer_name: string;
@@ -78,6 +147,7 @@ export interface Declaration {
   remarks: string | null;
   attachments: Attachment[];
   items?: DeclarationItem[];
+  payments?: DeclarationPayment[];
 }
 
 export const STATUS_STYLES: Record<DeclarationStatus, string> = {
@@ -127,16 +197,18 @@ export async function fetchDeclarations(): Promise<Declaration[]> {
 export async function fetchDeclaration(id: string): Promise<Declaration> {
   const { data, error } = await supabase
     .from("import_declarations")
-    .select("*, declaration_items(*)")
+    .select("*, declaration_items(*), declaration_payments(*)")
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("Declaration not found");
-  const { declaration_items, ...row } = data as typeof data & {
+  const { declaration_items, declaration_payments, ...row } = data as typeof data & {
     declaration_items?: DeclarationItem[];
+    declaration_payments?: DeclarationPayment[];
   };
   const declaration = normalize([row])[0]!;
   declaration.items = (declaration_items ?? []).sort((a, b) => a.position - b.position);
+  declaration.payments = (declaration_payments ?? []).sort((a, b) => a.position - b.position);
   return declaration;
 }
 
