@@ -89,6 +89,17 @@ function itemsToLines(items: DeclarationItem[]) {
     .join("\n");
 }
 
+function paymentsToLines(payments: DeclarationPayment[]) {
+  return payments
+    .filter((payment) => payment.amount_birr != null && payment.amount_birr > 0)
+    .map(
+      (payment, index) =>
+        `${index + 1}. ${formatBirr(payment.amount_birr)} — ${paymentReason(payment)}` +
+        `${payment.collected_on ? ` (${payment.collected_on})` : ""}`,
+    )
+    .join("\n");
+}
+
 export function DeclarationForm({ declaration }: { declaration?: Declaration | null }) {
   const navigate = useNavigate();
   const [values, setValues] = useState<FormValues>(() => initialValues(declaration));
